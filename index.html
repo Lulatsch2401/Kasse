@@ -194,22 +194,22 @@
         <div class="info">
           <span><strong>Cocktails</strong> <br>
           <span style="color:#292;"><b>6,00</b> €</span>
-          <!-- Kein Pfand hier -->
+          <!-- Pfand 1,00 € -->
           </span>
         </div>
         <span class="counter" id="counter-Cocktails">0</span>
-        <button class="plus" onclick="addToCart('Cocktails', 6, 0)">+</button>
+        <button class="plus" onclick="addToCart('Cocktails', 6, 1)">+</button>
       </div>
       <div class="product">
         <button class="minus" onclick="removeFromCart('Sekt')">−</button>
         <div class="info">
           <span><strong>Sekt</strong> <br>
           <span style="color:#292;"><b>4,00</b> €</span>
-          <!-- Kein Pfand hier -->
+          <!-- Pfand 1,00 € -->
           </span>
         </div>
         <span class="counter" id="counter-Sekt">0</span>
-        <button class="plus" onclick="addToCart('Sekt', 4, 0)">+</button>
+        <button class="plus" onclick="addToCart('Sekt', 4, 1)">+</button>
       </div>
       <div class="product">
         <button class="minus" onclick="removeFromCart('Shots')">−</button>
@@ -221,12 +221,37 @@
         <span class="counter" id="counter-Shots">0</span>
         <button class="plus" onclick="addToCart('Shots', 2, 0)">+</button>
       </div>
+
+      <div class="product">
+        <button class="minus" onclick="removeFromCart('Softdrinks')">−</button>
+        <div class="info">
+          <span><strong>Softdrinks</strong> <br>
+          <span style="color:#292;"><b>3,00</b> €</span>
+          <!-- Pfand 1,00 € -->
+          </span>
+        </div>
+        <span class="counter" id="counter-Softdrinks">0</span>
+        <button class="plus" onclick="addToCart('Softdrinks', 3, 1)">+</button>
+      </div>
+
+      <div class="product">
+        <button class="minus" onclick="removeFromCart('Wasser')">−</button>
+        <div class="info">
+          <span><strong>Wasser</strong> <br>
+          <span style="color:#292;"><b>2,00</b> €</span>
+          <!-- Pfand 1,00 € -->
+          </span>
+        </div>
+        <span class="counter" id="counter-Wasser">0</span>
+        <button class="plus" onclick="addToCart('Wasser', 2, 1)">+</button>
+      </div>
+
       <div class="product">
         <button class="minus" onclick="removeFromCart('PfandRückgabe')">−</button>
         <div class="info">
           <span><strong>Pfand-Rückgabe</strong> <br>
           <span style="color:#cf2a2a;"><b>–1,00</b> €</span></span>
-          <div class="product-description">Rückgabe von Pfand (Cocktails, Sekt)</div>
+          <div class="product-description">Rückgabe von Pfand (Cocktails, Sekt, Softdrinks, Wasser)</div>
         </div>
         <span class="counter" id="counter-PfandRückgabe">0</span>
         <button class="plus" onclick="addToCart('PfandRückgabe', -1, 0)">+</button>
@@ -259,11 +284,14 @@
       </div>
     </div>
   </div>
+
 <script>
   const products = {
-    Cocktails: { price: 6, pfand: 0 },  // Pfand nicht im Produktpreis, sondern separat
-    Sekt: { price: 4, pfand: 0 },
+    Cocktails: { price: 6, pfand: 1 },
+    Sekt: { price: 4, pfand: 1 },
     Shots: { price: 2, pfand: 0 },
+    Softdrinks: { price: 3, pfand: 1 },
+    Wasser: { price: 2, pfand: 1 },
     PfandRückgabe: { price: -1, pfand: 0 },
   };
 
@@ -271,7 +299,9 @@
     Cocktails: 0,
     Sekt: 0,
     Shots: 0,
-    PfandRückgabe: 0
+    Softdrinks: 0,
+    Wasser: 0,
+    PfandRückgabe: 0,
   };
 
   let cashInput = "";
@@ -302,22 +332,22 @@
     cartList.innerHTML = "";
     let total = 0;
 
-    // Pfand separat ausrechnen: Cocktails + Sekt * 1 €
-    const pfandCount = cartCounts.Cocktails + cartCounts.Sekt;
-    const pfandPricePerItem = 1;
-    const pfandTotal = pfandCount * pfandPricePerItem;
+    let pfandCount = 0;
+    let pfandTotal = 0;
 
     for (const [name, count] of Object.entries(cartCounts)) {
       if (count === 0) continue;
 
-      if (name === "Cocktails" || name === "Sekt") {
-        // Nur reiner Preis, kein Pfand hier
-        const itemTotal = count * products[name].price;
-        const display = `${name} × ${count} = ${itemTotal.toFixed(2)} €`;
+      if (name === "Cocktails" || name === "Sekt" || name === "Softdrinks" || name === "Wasser") {
+        const productPrice = products[name].price;
+        const itemTotal = count * productPrice;
         const li = document.createElement("li");
-        li.innerHTML = display;
+        li.innerHTML = `${name} × ${count} = ${itemTotal.toFixed(2)} €`;
         cartList.appendChild(li);
         total += itemTotal;
+
+        pfandCount += count;
+        pfandTotal += count * products[name].pfand;
 
       } else if (name === "Shots") {
         const sets = Math.floor(count / 3);
@@ -334,18 +364,17 @@
 
       } else if (name === "PfandRückgabe") {
         const itemTotal = count * products.PfandRückgabe.price;
-        const display = `Pfand-Rückgabe × ${count} = <span style="color:#cf2a2a;">${itemTotal.toFixed(2)} €</span>`;
         const li = document.createElement("li");
-        li.innerHTML = display;
+        li.innerHTML = `Pfand-Rückgabe × ${count} = <span style="color:#cf2a2a;">${itemTotal.toFixed(2)} €</span>`;
         cartList.appendChild(li);
         total += itemTotal;
+        pfandTotal += itemTotal;  // Pfand Rückgabe reduziert Pfand
       }
     }
 
     if (pfandCount > 0) {
-      const displayPfand = `Pfand × ${pfandCount} = <span style="color:#947b2f;">${pfandTotal.toFixed(2)} €</span>`;
       const liPfand = document.createElement("li");
-      liPfand.innerHTML = displayPfand;
+      liPfand.innerHTML = `Pfand × ${pfandCount} = <span style="color:#947b2f;">${pfandTotal.toFixed(2)} €</span>`;
       cartList.appendChild(liPfand);
       total += pfandTotal;
     }
