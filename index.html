@@ -362,14 +362,14 @@
         cartList.appendChild(li);
         total += itemTotal;
 
-      } else if (name === "PfandRückgabe") {
-        const itemTotal = count * products.PfandRückgabe.price;
-        const li = document.createElement("li");
-        li.innerHTML = `Pfand-Rückgabe × ${count} = <span style="color:#cf2a2a;">${itemTotal.toFixed(2)} €</span>`;
-        cartList.appendChild(li);
-        total += itemTotal;
-        pfandTotal += itemTotal;  // Pfand Rückgabe reduziert Pfand
-      }
+} else if (name === "PfandRückgabe") {
+  const itemTotal = count * products.PfandRückgabe.price;
+  const li = document.createElement("li");
+  li.innerHTML = `Pfand-Rückgabe × ${count} = <span style="color:#cf2a2a;">${itemTotal.toFixed(2)} €</span>`;
+  cartList.appendChild(li);
+  total += itemTotal;
+  // KEIN pfandTotal += itemTotal mehr!
+}
     }
 
     if (pfandCount > 0) {
